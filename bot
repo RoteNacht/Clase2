@@ -1,0 +1,67 @@
+import discord
+from discord.ext import commands
+import random
+import asyncio
+
+descripcion = '''Un bot de ejemplo para mostrar la extensión discord.ext.commands.
+
+Aquí se muestran varios comandos de utilidad.'''
+
+intents = discord.Intents.default()
+intents.members = True
+intents.message_content = True
+
+bot = commands.Bot(command_prefix='♠', description=descripcion, intents=intents)
+    
+@bot.event
+async def on_ready():
+    print(f'Conectado como {bot.user} (ID: {bot.user.id})')
+    print('------')
+
+@bot.command()
+async def lista(ctx):
+    await ctx.send('♠sumar: Suma dos números. Por ejemplo: ♠sumar 5 10.\n'
+                   '♠tirar: Tira un dado en formato NdN. Por ejemplo: ♠tirar 2d6.\n'
+                   '♠elegir: Elige entre varias opciones. Por ejemplo: ♠elegir opción1 opción2 opción3.\n'
+                   '♠spam: Envia "Hola" el número de veces que especifiques. Por ejemplo: ♠spam 5.\n'
+                   '♠genial bot: Muestra si el bot es genial o no.')  
+    
+@bot.command()
+async def sum(ctx, izquierda: int, derecha: int):
+    if 1000 > izquierda + derecha:
+        await ctx.send(izquierda + derecha)
+    else:
+        await ctx.send('El número a ser mayor de 1000 podría generar problemas')
+
+@bot.command()
+async def tirar(ctx, dados: str):
+    try:
+        tiradas, limite = map(int, dados.split('d'))
+    except Exception:
+        await ctx.send('¡El formato debe ser en NdN!')
+        return
+
+    resultado = ', '.join(str(random.randint(1, limite)) for _ in range(tiradas))
+    await ctx.send(resultado)
+
+@bot.command()
+async def spam(ctx, nume: int):
+    for _ in range(nume):
+        await ctx.send('Hola')
+        await asyncio.sleep(2)
+
+@bot.command(description='Para cuando quieras resolver algo de otra manera')
+async def elegir(ctx, *opciones: str):
+    """Elige entre varias opciones."""
+    await ctx.send(random.choice(opciones))
+
+@bot.group()
+async def genial(ctx):
+    if ctx.invoked_subcommand is None:
+        await ctx.send(f'No, {ctx.subcommand_passed} no es genial')
+
+@genial.command(name='bot')
+async def _bot(ctx):
+    await ctx.send('Sí, el bot es genial.\n¡Siempre ganas!')
+
+bot.run('MTIwMzM5MTk2ODcxNDE3MDM4OA.GT8FyS.fJ6C9oI2J6lBr_IDAwwdKxrOEpVMVoJfHF5fKs')
